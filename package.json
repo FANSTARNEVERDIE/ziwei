@@ -1,0 +1,27 @@
+{
+  "name": "ziwei",
+  "version": "1.0.0",
+  "description": "紫微斗数在线排盘：十二宫星曜、大限流年、白话解读。纯静态，无后端。",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "node tools/build-dist.js",
+    "serve": "node serve.js",
+    "test": "node run-tests.js",
+    "test:sw": "node tools/run-sw-test.js",
+    "check": "node tools/check-ids.js",
+    "icons": "node tools/make-icons.js",
+    "leap": "node tools/gen-leap-table.js"
+  },
+  "//": "iztro 仅测试脚本使用（Node 环境做对照验证）。浏览器端加载的是 vendor/iztro.min.js，不依赖 node_modules。因此放在 devDependencies，避免部署平台构建时下载无用依赖。",
+  "devDependencies": {
+    "iztro": "^2.6.3"
+  },
+  "keywords": [
+    "ziwei",
+    "紫微斗数",
+    "astrology",
+    "pwa"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0908">
+<meta name="color-scheme" content="dark">
+<title>紫微斗數 · 星盤排盤</title>
+<meta name="description" content="紫微斗数在线排盘：支持阳历农历、真太阳时校正，完整呈现十二宫、十四主星、四化、大限流年小限。纯本地运算，不上传生辰，可离线使用。">
+<meta property="og:title" content="紫微斗數 · 星盤排盤">
+<meta property="og:description" content="输入生辰，即刻铺陈十二宫星曜、大限与流年。纯本地运算，不上传生辰。">
+<meta property="og:type" content="website">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="紫微斗數">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 星野背景 -->
+<div class="starfield"></div>
+
+<a class="skip-link" href="#mainContent">跳到主要内容</a>
+
+<nav class="site-nav" aria-label="主导航">
+  <div class="nav-inner">
+    <a class="brand" href="#" aria-label="紫微斗数首页">
+      <span class="brand-mark">紫</span>
+      <span class="brand-text">
+        <strong>紫微斗數</strong>
+        <small>星盤 · 流年 · 大限</small>
+      </span>
+    </a>
+    <div class="nav-actions">
+      <button type="button" class="nav-link" id="navDemo">示例命盤</button>
+      <button type="button" class="nav-link" id="navReset">重新起盤</button>
+    </div>
+  </div>
+</nav>
+
+<main class="container" id="mainContent">
+
+  <!-- ========== 输入表单 ========== -->
+  <section class="panel form-panel" id="formPanel">
+    <form id="chartForm" autocomplete="off">
+      <div class="form-grid">
+
+        <div class="field">
+          <label>历法</label>
+          <div class="seg" data-name="calendar">
+            <button type="button" class="seg-btn active" data-val="solar">阳历</button>
+            <button type="button" class="seg-btn" data-val="lunar">农历</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>性别</label>
+          <div class="seg" data-name="gender">
+            <button type="button" class="seg-btn active" data-val="男">男</button>
+            <button type="button" class="seg-btn" data-val="女">女</button>
+          </div>
+        </div>
+
+        <div class="field field-wide">
+          <label>出生日期</label>
+          <div class="date-row">
+            <input type="number" id="year" placeholder="年" min="1900" max="2100" value="2000">
+            <span class="unit">年</span>
+            <input type="number" id="month" placeholder="月" min="1" max="12" value="8">
+            <span class="unit">月</span>
+            <input type="number" id="day" placeholder="日" min="1" max="31" value="16">
+            <span class="unit">日</span>
+          </div>
+
+          <!-- 闰月开关：仅当所选农历年该月确有闰月时出现 -->
+          <div class="leap-row" id="leapRow" hidden>
+            <label class="checkbox-line">
+              <input type="checkbox" id="isLeapMonth">
+              <span>这个月是<strong id="leapLabel">闰月</strong></span>
+            </label>
+            <span class="leap-note">同一年同一个月份会出现两次，第二次就是闰月</span>
+          </div>
+          <!-- 提示该年闰月信息（选了非闰月但该年有闰月时） -->
+          <p class="leap-hint" id="leapHint" hidden></p>
+
+          <p class="hint" id="lunarHint"></p>
+        </div>
+
+        <div class="field field-wide">
+          <label>出生时辰 <span class="label-sub">（不确定可选「时辰未知」，按午时计）</span></label>
+          <div class="shichen-grid" id="shichenGrid"></div>
+        </div>
+
+        <div class="field field-wide">
+          <label class="checkbox-line">
+            <input type="checkbox" id="trueSolar">
+            <span>使用真太阳时校正</span>
+          </label>
+          <div class="longitude-row" id="longitudeRow" hidden>
+            <label for="longitude">出生地经度</label>
+            <input type="number" id="longitude" value="120" min="73" max="135" step="0.1">
+            <span class="unit">°E</span>
+            <span class="hint-inline">中国范围约 73–135</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" id="submitBtn">
+          <span class="btn-label">起 盤</span>
+          <span class="btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/>
+            </svg>
+          </span>
+        </button>
+        <button type="button" class="btn-ghost" id="resetBtn">重置</button>
+      </div>
+      <p class="form-error" id="formError" hidden></p>
+    </form>
+  </section>
+
+  <!-- ========== 命盘区 ========== -->
+  <section id="resultSection" hidden>
+
+    <!-- 基本信息条 -->
+    <div class="panel info-bar">
+      <div class="info-main">
+        <div class="info-name" id="infoName">命主</div>
+        <div class="info-sub" id="infoSub"></div>
+      </div>
+      <div class="info-chips" id="infoChips"></div>
+    </div>
+
+    <!-- 操作栏：分享 / 收藏 / 导出 -->
+    <div class="panel action-bar">
+      <div class="action-left">
+        <button type="button" class="act-btn" id="actCopy">
+          <span class="act-ico" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6.5 9.5a2.5 2.5 0 0 0 3.5 0l2-2a2.5 2.5 0 0 0-3.5-3.5l-.7.7"/>
+              <path d="M9.5 6.5a2.5 2.5 0 0 0-3.5 0l-2 2a2.5 2.5 0 0 0 3.5 3.5l.7-.7"/>
+            </svg>
+          </span>
+          <span class="act-label">复制链接</span>
+        </button>
+        <button type="button" class="act-btn" id="actSave">
+          <span class="act-ico" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 2.5h8v11l-4-2.8-4 2.8z"/>
+            </svg>
+          </span>
+          <span class="act-label">收藏命盘</span>
+        </button>
+        <button type="button" class="act-btn" id="actFavs">
+          <span class="act-ico" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+            </svg>
+          </span>
+          <span class="act-label">我的收藏</span>
+          <span class="act-count" id="favCount" hidden>0</span>
+        </button>
+        <button type="button" class="act-btn" id="actCompat">
+          <span class="act-ico" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="5.6" cy="6" r="2.4"/><circle cx="10.4" cy="6" r="2.4"/>
+              <path d="M1.8 13.2c0-2 1.7-3.4 3.8-3.4s3.8 1.4 3.8 3.4"/>
+              <path d="M9.2 10.2c1.9.2 3.4 1.5 3.4 3"/>
+            </svg>
+          </span>
+          <span class="act-label">合盤對照</span>
+        </button>
+        <button type="button" class="act-btn" id="actStars">
+          <span class="act-ico" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 1.8l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 10.6l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z"/>
+            </svg>
+          </span>
+          <span class="act-label">星曜图鉴</span>
+        </button>
+        <button type="button" class="act-btn" id="actExport">
+          <span class="act-ico" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8M5 7l3 3 3-3"/>
+              <path d="M2.5 12.5h11"/>
+            </svg>
+          </span>
+          <span class="act-label">导出图片</span>
+        </button>
+        <button type="button" class="act-btn" id="actPrint">
+          <span class="act-ico" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.5 6V2.5h7V6"/>
+              <path d="M4.5 12H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1.5"/>
+              <path d="M4.5 9.5h7v4h-7z"/>
+            </svg>
+          </span>
+          <span class="act-label">打印 / 存 PDF</span>
+        </button>
+      </div>
+      <p class="action-note">生辰只留在本机，不会上传</p>
+    </div>
+
+    <!-- ===== 白话解读（起盘后最先看到的内容） ===== -->
+    <section class="panel reading-panel" id="readingPanel" aria-labelledby="readingTitle">
+      <header class="reading-head">
+        <span class="reading-eyebrow">白话解读</span>
+        <h2 class="reading-title" id="readingTitle">你是个什么样的人</h2>
+      </header>
+
+      <!-- 一句话结论 -->
+      <p class="reading-lead" id="readingLead"></p>
+
+      <!-- 特质标签 -->
+      <div class="reading-tags" id="readingTags"></div>
+
+      <!-- 优势 / 课题 / 建议 -->
+      <div class="reading-blocks" id="readingBlocks"></div>
+
+      <!-- 四化重点 -->
+      <div class="reading-focus">
+        <h3 class="reading-sub">这张盘最该注意的地方</h3>
+        <p class="reading-hint">下面的「禄权科忌」是整张盘最实用的部分——它们标出了你哪里顺、哪里要花心思。</p>
+        <ul class="focus-list" id="readingFocus"></ul>
+      </div>
+
+      <p class="reading-disclaimer">
+        以上是紫微斗数的传统解读，属文化参考。它描述的是倾向，不是定论——你可以选择怎么用它。
+      </p>
+    </section>
+
+    <!-- 流年控制 -->
+    <div class="panel liunian-bar">
+      <div class="ln-left">
+        <span class="ln-label">流年</span>
+        <button type="button" class="ln-step" id="yearPrev" aria-label="上一年">‹</button>
+        <input type="number" id="liunianYear" class="ln-year" value="2026" min="1900" max="2100" aria-label="流年年份">
+        <button type="button" class="ln-step" id="yearNext" aria-label="下一年">›</button>
+        <button type="button" class="btn-mini" id="yearNow">今年</button>
+
+        <span class="ln-sep" aria-hidden="true"></span>
+        <label class="ln-label ln-label-sm" for="liunianMonth">流月</label>
+        <select class="ln-month" id="liunianMonth" aria-label="流月月份"></select>
+      </div>
+      <div class="ln-right" id="liunianMeta"></div>
+    </div>
+
+    <!-- 流日 / 流时 -->
+    <div class="panel day-bar">
+      <div class="day-left">
+        <span class="ln-label ln-label-sm">流日</span>
+        <button type="button" class="ln-step" id="dayPrev" aria-label="前一天">‹</button>
+        <input type="date" id="liunianDate" class="ln-date" aria-label="流日日期">
+        <button type="button" class="ln-step" id="dayNext" aria-label="后一天">›</button>
+        <button type="button" class="btn-mini" id="dayToday">今天</button>
+
+        <span class="ln-sep" aria-hidden="true"></span>
+        <label class="ln-label ln-label-sm" for="liunianHour">流時</label>
+        <select class="ln-month" id="liunianHour" aria-label="流时时辰"></select>
+      </div>
+      <div class="day-right" id="dayMeta"></div>
+    </div>
+
+    <!-- 流年白话解读 -->
+    <section class="panel year-panel" id="yearPanel" aria-live="polite">
+      <header class="year-head">
+        <span class="reading-eyebrow">流年白话</span>
+        <h2 class="year-title" id="yearTitle"></h2>
+      </header>
+      <p class="year-lead" id="yearLead"></p>
+      <p class="year-daxian" id="yearDaxian"></p>
+      <ul class="year-hua" id="yearHua"></ul>
+
+      <!-- 流月 -->
+      <div class="month-block" id="monthBlock" hidden>
+        <h3 class="month-title" id="monthTitle"></h3>
+        <p class="month-lead" id="monthLead"></p>
+        <ul class="year-hua month-hua" id="monthHua"></ul>
+      </div>
+
+      <!-- 流日 / 流时 -->
+      <div class="month-block" id="dayBlock" hidden>
+        <h3 class="month-title" id="dayTitle"></h3>
+        <p class="month-lead" id="dayLead"></p>
+        <ul class="year-hua month-hua" id="dayHua"></ul>
+      </div>
+
+      <!-- 流时：时间颗粒度最细，层级也最深，默认收起避免四段并列造成信息过载 -->
+      <details class="hour-fold" id="hourFold">
+        <summary>
+          <span class="hf-label">流時</span>
+          <span class="hf-title" id="hourFoldTitle"></span>
+        </summary>
+        <div class="hour-inner" id="hourBlock">
+          <p class="month-lead" id="hourLead"></p>
+          <ul class="year-hua month-hua" id="hourHua"></ul>
+        </div>
+      </details>
+    </section>
+
+    <!-- 大限时间轴 -->
+    <section class="panel daxian-panel" data-reveal>
+      <header class="reading-head">
+        <span class="reading-eyebrow">人生阶段</span>
+        <h2 class="reading-title">大限时间轴</h2>
+        <p class="reading-hint" style="margin-top:8px">
+          紫微斗数把人生每十年划为一个「大限」。金色的是你现在所处的阶段，点任意一段可跳到那个时期。
+        </p>
+      </header>
+      <ol class="daxian-track" id="daxianTrack"></ol>
+    </section>
+
+    <!-- 星盘 -->
+    <div class="chart-wrap" data-reveal>
+      <div class="chart" id="chart"></div>
+    </div>
+
+    <!-- 图例 -->
+    <div class="panel legend-bar" data-reveal>
+      <div class="legend-group">
+        <span class="legend-title">四化</span>
+        <span class="tag tag-lu">禄</span>
+        <span class="tag tag-quan">权</span>
+        <span class="tag tag-ke">科</span>
+        <span class="tag tag-ji">忌</span>
+        <span class="legend-txt">星曜后面的小方块，标出哪里顺、哪里要花心思</span>
+      </div>
+      <div class="legend-group">
+        <span class="legend-title">星曜</span>
+        <span class="dot dot-major"></span><span class="legend-txt">主星（性格核心）</span>
+        <span class="dot dot-aux"></span><span class="legend-txt">辅星（助力）</span>
+        <span class="dot dot-sha"></span><span class="legend-txt">煞星（阻力）</span>
+      </div>
+      <div class="legend-group">
+        <span class="legend-title">大限</span>
+        <span class="legend-txt">宫位上的数字是年龄区间，金色高亮=你当前所处的十年</span>
+      </div>
+    </div>
+
+    <!-- 新手导读 -->
+    <section class="panel guide-panel" data-reveal>
+      <header class="reading-head">
+        <span class="reading-eyebrow">第一次看盘</span>
+        <h2 class="reading-title">四步看懂这张盘</h2>
+      </header>
+      <ol class="guide-list" id="guideList"></ol>
+      <p class="guide-foot">
+        看不懂某个词？<button type="button" class="link-btn" id="openGlossary">打开术语词典</button>
+        也可以直接点击盘上任意一格，看该宫的详细解释。
+      </p>
+    </section>
+
+  </section>
+
+  <!-- 空态：用十二宫线框预告起盘后的形态（紫微斗数用十二宫，非八卦） -->
+  <section class="empty-state" id="emptyState">
+    <div class="empty-chart" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+      <span></span><i></i><i></i><span></span>
+      <span></span><i></i><i></i><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="empty-copy">
+      <h2 class="empty-title">十二宮星曜<br>待你起盤</h2>
+      <p class="empty-sub">填入出生年月日時，本命盤、大限與流年即刻鋪陳。生辰僅在本機運算。</p>
+      <p class="empty-hint">或先看一張示例命盤</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- 宫位详情抽屉 -->
+<div class="drawer-mask" id="drawerMask" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="宫位详情">
+  <div class="drawer-head">
+    <div>
+      <h2 id="drawerTitle"></h2>
+      <p id="drawerSub"></p>
+    </div>
+    <button type="button" class="drawer-close" id="drawerClose" aria-label="关闭">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<!-- 术语词典 -->
+<div class="drawer-mask" id="glossaryMask" hidden></div>
+<aside class="drawer glossary" id="glossary" hidden aria-label="术语词典">
+  <div class="drawer-head">
+    <div>
+      <h2>術語詞典</h2>
+      <p>紫微斗数里那些看不懂的词，这里都有人话解释</p>
+    </div>
+    <button type="button" class="drawer-close" id="glossaryClose" aria-label="关闭">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="search" class="gloss-search" id="glossSearch" placeholder="搜索术语，如「化忌」「大限」" aria-label="搜索术语">
+    <dl class="gloss-list" id="glossList"></dl>
+  </div>
+</aside>
+
+<!-- 术语即时解释气泡 -->
+<div class="term-pop" id="termPop" hidden role="dialog" aria-label="术语解释">
+  <div class="term-pop-head">
+    <strong id="termPopName"></strong>
+    <button type="button" class="term-pop-close" id="termPopClose" aria-label="关闭">✕</button>
+  </div>
+  <p id="termPopText"></p>
+</div>
+
+<!-- 收藏夹 -->
+<div class="drawer-mask" id="favMask" hidden></div>
+<aside class="drawer fav-drawer" id="favDrawer" hidden aria-label="我的收藏">
+  <div class="drawer-head">
+    <div>
+      <h2>我的收藏</h2>
+      <p id="favSub">保存在本机浏览器，清除浏览器数据会一并删除</p>
+    </div>
+    <button type="button" class="drawer-close" id="favClose" aria-label="关闭">✕</button>
+  </div>
+  <div class="drawer-body">
+    <ul class="fav-list" id="favList"></ul>
+    <button type="button" class="link-btn fav-clear" id="favClear" hidden>清空全部收藏</button>
+  </div>
+</aside>
+
+<!-- 星曜图鉴 -->
+<div class="drawer-mask" id="starMask" hidden></div>
+<aside class="drawer glossary star-drawer" id="starDrawer" hidden aria-label="星曜图鉴">
+  <div class="drawer-head">
+    <div>
+      <h2>星曜圖鑑</h2>
+      <p>十四主星与辅星煞星的完整解释</p>
+    </div>
+    <button type="button" class="drawer-close" id="starClose" aria-label="关闭">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="search" class="gloss-search" id="starSearch" placeholder="搜索星曜，如「紫微」「擎羊」" aria-label="搜索星曜">
+    <div class="star-list" id="starList"></div>
+  </div>
+</aside>
+
+<!-- 合盘 -->
+<div class="modal-mask" id="compatMask" hidden></div>
+<div class="modal compat-modal" id="compatModal" hidden role="dialog" aria-label="合盘对照" aria-modal="true">
+  <header class="modal-head">
+    <div>
+      <h2>合盤對照</h2>
+      <p>填入另一个人的生辰，看两人的相处倾向</p>
+    </div>
+    <button type="button" class="drawer-close" id="compatClose" aria-label="关闭">✕</button>
+  </header>
+  <div class="modal-body compat-body">
+    <!-- 第二人输入 -->
+    <div class="compat-form" id="compatForm">
+      <div class="cf-row">
+        <span class="cf-person">對方</span>
+        <div class="seg" data-name="cgender">
+          <button type="button" class="seg-btn active" data-val="女">女</button>
+          <button type="button" class="seg-btn" data-val="男">男</button>
+        </div>
+      </div>
+      <div class="cf-row">
+        <span class="cf-person">生辰</span>
+        <div class="date-row">
+          <input type="number" id="cYear" placeholder="年" min="1900" max="2100" value="1990">
+          <span class="unit">年</span>
+          <input type="number" id="cMonth" placeholder="月" min="1" max="12" value="5">
+          <span class="unit">月</span>
+          <input type="number" id="cDay" placeholder="日" min="1" max="31" value="20">
+          <span class="unit">日</span>
+        </div>
+      </div>
+      <div class="cf-row cf-row-top">
+        <span class="cf-person">時辰</span>
+        <div class="shichen-grid cf-shichen" id="cShichenGrid"></div>
+      </div>
+      <div class="cf-actions">
+        <button type="button" class="btn-primary btn-sm" id="compatGo">
+          <span class="btn-label">開始對照</span>
+          <span class="btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/>
+            </svg>
+          </span>
+        </button>
+        <button type="button" class="btn-ghost" id="compatFromFav">從收藏選</button>
+      </div>
+      <p class="cf-hint" id="compatHint"></p>
+    </div>
+
+    <!-- 对照结果 -->
+    <div class="compat-result" id="compatResult" hidden></div>
+  </div>
+  <footer class="modal-foot" id="compatFoot" hidden>
+    <button type="button" class="btn-ghost" id="compatBack">重新填寫</button>
+  </footer>
+</div>
+
+<!-- 轻提示 -->
+<div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+
+<!-- 离线 / 更新 状态条 -->
+<div class="net-bar" id="netBar" hidden role="status" aria-live="polite"></div>
+<div class="update-bar" id="updateBar" hidden>
+  <span>有新版本可用</span>
+  <button type="button" class="link-btn" id="updateReload">立即更新</button>
+</div>
+
+<!-- 导出预览 -->
+<div class="modal-mask" id="exportMask" hidden></div>
+<div class="modal export-modal" id="exportModal" hidden role="dialog" aria-label="导出命盘图片" aria-modal="true">
+  <header class="modal-head">
+    <div>
+      <h2>导出命盘图片</h2>
+      <p>保存后可直接发给别人</p>
+    </div>
+    <button type="button" class="drawer-close" id="exportClose" aria-label="关闭">✕</button>
+  </header>
+  <div class="modal-body">
+    <div class="export-preview" id="exportPreview"></div>
+  </div>
+  <footer class="modal-foot">
+    <button type="button" class="btn-primary btn-sm" id="exportDownload">
+      <span class="btn-label">保存圖片</span>
+      <span class="btn-icon" aria-hidden="true">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3v7M5.5 7.5 8 10l2.5-2.5"/><path d="M3 12.5h10"/>
+        </svg>
+      </span>
+    </button>
+    <button type="button" class="btn-ghost" id="exportCancel">取消</button>
+  </footer>
+</div>
+
+<footer class="site-footer">
+  <p class="footer-note">生辰信息仅在本机浏览器内用于排盘，不会上传或存储。</p>
+  <p>排盘引擎 <a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener">iztro</a> · 命理内容为传统文化参考，不构成决策依据</p>
+</footer>
+
+<script src="vendor/iztro.min.js"></script>
+<script src="js/store.js"></script>
+<script src="js/lunar-table.js"></script>
+<script src="js/leap.js"></script>
+<script src="js/interpret.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

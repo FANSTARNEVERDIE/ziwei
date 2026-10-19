@@ -1,0 +1,20 @@
+# 统一换行符为 LF。
+# 本项目在 Windows 上开发、在 Linux 上构建部署（Cloudflare Pages），
+# 若提交 CRLF，Linux 端的 shell 脚本与部分工具会出问题。
+* text=auto eol=lf
+
+# 图片与字体是二进制，不做换行符转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# 压缩过的第三方库不做 diff（避免污染代码评审）
+vendor/*.min.js -diff linguist-vendored
+
+# 锁文件按二进制处理，避免合并冲突噪音
+package-lock.json -diff
