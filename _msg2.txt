@@ -1,0 +1,9 @@
+补充：远端校验与 API 推送工具
+
+- tools/verify-remote.js 比对本地与 GitHub 的 tree SHA，确认内容一致
+- tools/push-via-api.js 在 github.com:443 被阻断时，改用 Git Data API 推送
+- tools/build-dist.js 打包部署产物（白名单 + 自检）
+- DEPLOY.md 记录网络受限时的两种绕过方案
+- LICENSE / THIRD-PARTY.md 明确本项目与 iztro（MIT）的授权
+- .gitattributes 统一换行符为 LF，避免 Linux 构建端出问题
+- package.json 补全 scripts，iztro 移到 devDependencies（部署平台不会下载无用依赖）

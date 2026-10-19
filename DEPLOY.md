@@ -4,6 +4,56 @@
 
 ---
 
+## ⚠️ 若 `git push` 连不上 github.com
+
+某些网络环境下 `github.com:443` 会被阻断（`api.github.com` 却正常），表现为：
+
+```
+fatal: unable to access 'https://github.com/...': Failed to connect to github.com port 443
+```
+
+**先确认是哪种情况：**
+
+```powershell
+Test-NetConnection github.com -Port 443       # 若 False，就是被阻断
+Test-NetConnection ssh.github.com -Port 443   # 若 True，可走 SSH
+```
+
+**方案 A：改用 SSH（走 443 端口，通常能通）**
+
+```bash
+ssh-keygen -t ed25519 -C "你的邮箱"
+# 把 ~/.ssh/id_ed25519.pub 的内容贴到 GitHub → Settings → SSH keys
+
+# 让 SSH 走 443 端口
+# 在 ~/.ssh/config 里加：
+#   Host github.com
+#     Hostname ssh.github.com
+#     Port 443
+#     User git
+
+git remote set-url origin git@github.com:<用户名>/<仓库名>.git
+git push -u origin main
+```
+
+**方案 B：用 GitHub API 推送**（`api.github.com` 可达时可用）
+
+仓库里带了 `tools/push-via-api.js`，通过 Git Data API 绕过 `git push`：
+
+```bash
+# 用 Node 以 UTF-8 写出提交信息（PowerShell 的 > 会写成 UTF-16 导致 API 报错）
+node -e "const{execSync}=require('child_process'),fs=require('fs');fs.writeFileSync('.git/COMMIT_MSG_TMP',execSync('git log -1 --pretty=%B',{encoding:'utf8'}),'utf8')"
+
+node tools/push-via-api.js
+```
+
+推送完可用 `node tools/verify-remote.js` 校验本地与远端内容是否一致
+（比对 tree SHA，比 commit SHA 可靠——后者会因提交者与时间不同而不同）。
+
+> 注意：仓库**完全为空**时 Git Data API 会返回 409，需要先用 Contents API 建一个文件初始化。
+
+---
+
 ## 准备：打包产物
 
 ```bash
