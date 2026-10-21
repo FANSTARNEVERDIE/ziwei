@@ -12,7 +12,7 @@
  * 否则已安装的用户会一直用旧缓存。
  * ============================================================ */
 
-const VERSION = 'ziwei-v2';
+const VERSION = 'ziwei-v11';
 const SHELL = [
   './',
   './index.html',
@@ -20,6 +20,13 @@ const SHELL = [
   './js/store.js',
   './js/lunar-table.js',
   './js/leap.js',
+  './js/star-palace.js',
+  './js/star-palace-provenance.js',
+  './js/sihua-star.js',
+  './js/sihua-exception.js',
+  './js/sihua-corrected.js',
+  './js/chart-print.js',
+  './js/day-layer.js',
   './js/interpret.js',
   './js/export.js',
   './js/app.js',

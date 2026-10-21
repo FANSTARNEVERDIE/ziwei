@@ -14,7 +14,17 @@ const ROOT = __dirname;
  * SW 离线测试需要浏览器，单独用 npm run test:sw 跑 */
 const SUITES = [
   ['test-e2e.js', true],
+  ['test-engine-truth.js', true],
   ['test-chart-html.js', true],
+  ['test-watermark.js', true],
+  ['test-star-palace.js', true],
+  ['test-star-palace-provenance.js', true],
+  ['test-sihua-star.js', true],
+  ['test-sihua-exception.js', true],
+  ['test-sihua-corrected.js', true],
+  ['test-variation.js', true],
+  ['test-same-chart.js', true],
+  ['test-similarity.js', true],
   ['test-interpret.js', true],
   ['test-daily.js', true],
   ['test-compat.js', true],

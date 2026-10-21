@@ -128,7 +128,7 @@ git push
 
 Cloudflare 自动重新部署。
 
-> ⚠️ **每次发版记得改 `sw.js` 里的 `VERSION`**（例如 `ziwei-v2` → `ziwei-v3`）。
+> ⚠️ **每次发版记得改 `sw.js` 里的 `VERSION`**（例如 `ziwei-v3` → `ziwei-v4`）。
 > 不改的话，已经访问过的用户会一直用旧缓存，看不到你的更新。
 > （旧缓存会在新 SW 激活时被自动清理，页面也会弹出「有新版本可用」提示。）
 
@@ -180,7 +180,7 @@ Cloudflare 会分配一个域名，但 **HTTPS 是 Service Worker 的硬性前�
 
 1. **能正常排盘** —— 输入生日，出盘
 2. **Service Worker 已激活** —— F12 → Application → Service Workers，状态应为 `activated`
-3. **离线可用** —— Application → Cache Storage → 应看到 `ziwei-v2`；勾选 Network 的 Offline 后刷新，**仍能排盘**
+3. **离线可用** —— Application → Cache Storage → 应看到 `ziwei-v3`；勾选 Network 的 Offline 后刷新，**仍能排盘**
 4. **可安装** —— 地址栏右侧出现安装图标（Chrome/Edge）
 
 本仓库提供了一个自动化的同款验证脚本，可以直接对着线上地址跑：

@@ -95,7 +95,9 @@
     const gap = 1;
     const pad = 30;
     const headH = 92;
-    const footH = 54;
+    // 页脚原来只放一行免责声明；现在多了品牌署名（+ 可选副标题），
+    // 高度不足会与盘面底部重叠
+    const footH = o.subtitle ? 96 : 76;
 
     const gridW = cell * 4 + gap * 3;
     const W = gridW + pad * 2;
@@ -115,6 +117,10 @@
     const a = astrolabe;
     let y = pad + 6;
     ctx.textBaseline = 'top';
+
+    // 品牌水印：右上角。导出图会被转发到各处，这里是最该留名的地方。
+    // 用「方框 + FANSTAR + 小字」的组合，与盘面自身的方框语言一致。
+    drawBrandMark(ctx, W - pad, pad + 4, { align: 'right' });
 
     ctx.fillStyle = C.goldBright;
     ctx.font = `500 26px ${SERIF}`;
@@ -345,13 +351,83 @@
     ctx.font = `400 11.5px ${SANS}`;
     ctx.fillStyle = C.txt3;
     ctx.textAlign = 'center';
-    ctx.fillText('命理內容為傳統文化參考，不構成決策依據', W / 2, fy);
+    ctx.fillText('命理内容为传统文化参考，不构成决策依据', W / 2, fy);
+
+    // 品牌署名 + 站点信息
+    ctx.font = `500 12px ${SANS}`;
+    ctx.fillStyle = C.goldDim;
+    ctx.fillText('FANSTAR  ·  紫微斗數排盘', W / 2, fy + 19);
+
     if (o.subtitle) {
-      ctx.fillText(fitText(ctx, o.subtitle, W - pad * 2), W / 2, fy + 18);
+      ctx.font = `400 11px ${SANS}`;
+      ctx.fillStyle = C.txt3;
+      ctx.fillText(fitText(ctx, o.subtitle, W - pad * 2), W / 2, fy + 38);
     }
     ctx.textAlign = 'left';
 
     return canvas;
+  }
+
+  /**
+   * 绘制品牌水印
+   * 导出图片会被转发、截图、二次发布，所以水印要：
+   *   - 清晰但不抢戏（用 goldDim，不压过盘面金色）
+   *   - 带方框图形，与盘面视觉语言一致，一眼认得出
+   *   - 可放左右两侧
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {number} x   基准 x（align=right 时为右边界）
+   * @param {number} yy  基准 y（顶部）
+   * @param {object} opts { align: 'left'|'right', scale: number }
+   */
+  function drawBrandMark(ctx, x, yy, opts) {
+    const o = opts || {};
+    const s = o.scale || 1;
+    const alignRight = o.align === 'right';
+
+    const box = Math.round(22 * s);      // 方框边长
+    const text = 'FANSTAR';
+    const sub = '紫微斗數';
+
+    ctx.save();
+    ctx.textBaseline = 'top';
+
+    ctx.font = `600 ${Math.round(13 * s)}px ${SANS}`;
+    const tw = ctx.measureText(text).width;
+    ctx.font = `400 ${Math.round(9 * s)}px ${SANS}`;
+    const sw = ctx.measureText(sub).width;
+
+    const textW = Math.max(tw, sw);
+    const gap = Math.round(7 * s);
+    const totalW = box + gap + textW;
+
+    // 计算起点：align=right 时整体右对齐
+    const x0 = alignRight ? x - totalW : x;
+
+    /* 方框 + 中心点（呼应盘面的十二宫方框语言） */
+    ctx.strokeStyle = 'rgba(184,148,74,0.75)';
+    ctx.lineWidth = Math.max(1, 1.4 * s);
+    ctx.strokeRect(x0 + 0.5, yy + 0.5, box - 1, box - 1);
+
+    ctx.fillStyle = C.goldBright;
+    const c = box / 2;
+    ctx.beginPath();
+    ctx.arc(x0 + c, yy + c, Math.max(1.6, 2.2 * s), 0, Math.PI * 2);
+    ctx.fill();
+
+    /* FANSTAR */
+    const tx = x0 + box + gap;
+    ctx.fillStyle = C.goldBright;
+    ctx.font = `600 ${Math.round(13 * s)}px ${SANS}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(text, tx, yy + Math.round(1 * s));
+
+    /* 下排小字 */
+    ctx.fillStyle = C.goldDim;
+    ctx.font = `400 ${Math.round(9 * s)}px ${SANS}`;
+    ctx.fillText(sub, tx, yy + Math.round(15 * s));
+
+    ctx.restore();
   }
 
   /** 找到当前虚岁所处的大限宫位 */
@@ -383,5 +459,5 @@
     });
   }
 
-  return { drawChart, downloadCanvas, findCurrentDaxian, fitText, GRID_POS };
+  return { drawChart, drawBrandMark, downloadCanvas, findCurrentDaxian, fitText, GRID_POS };
 });

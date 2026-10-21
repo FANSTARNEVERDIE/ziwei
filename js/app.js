@@ -95,6 +95,12 @@
     readingTags: $('readingTags'),
     readingBlocks: $('readingBlocks'),
     readingFocus: $('readingFocus'),
+    palaceGrid: $('palaceGrid'),
+    sameChartBlock: $('sameChartBlock'),
+    sameChartExplain: $('sameChartExplain'),
+    sameChartHead: $('sameChartHead'),
+    sameChartList: $('sameChartList'),
+    sameChartCaveat: $('sameChartCaveat'),
     // 流年白话
     yearPanel: $('yearPanel'),
     yearTitle: $('yearTitle'),
@@ -107,6 +113,7 @@
     monthLead: $('monthLead'),
     monthHua: $('monthHua'),
     daxianTrack: $('daxianTrack'),
+    daxianDetail: $('daxianDetail'),
     // 流日 / 流时
     liunianDate: $('liunianDate'),
     liunianHour: $('liunianHour'),
@@ -736,7 +743,7 @@
     el.submitBtn.setAttribute('aria-busy', on ? 'true' : 'false');
     // 注意文案节点是 .btn-label（按钮里还有一个图标 span）
     const label = el.submitBtn.querySelector('.btn-label');
-    if (label) label.textContent = on ? '起 盤 中' : '起 盤';
+    if (label) label.textContent = on ? '起 盘 中' : '起 盘';
   }
 
   function resetForm() {
@@ -1165,12 +1172,19 @@
       if (d.isPast) cls.push('is-past');
       // 查看中的那段若不是现实所在，明确标注，避免误读
       const badge = d.isNow
-        ? '<span class="dx-now">現在</span>'
+        ? '<span class="dx-now">现在</span>'
         : (d.isViewing ? '<span class="dx-now dx-viewing">查看中</span>' : '');
+      // 这一宫本命里的主星——让每一段真正属于这张盘
+      const stars = d.stars && d.stars.length
+        ? `<span class="dx-stars">${d.stars.join('、')}</span>`
+        : '<span class="dx-stars is-empty">无主星</span>';
+      // 悬浮与点击时给出完整说明
+      const tip = d.note ? ` title="${String(d.note).replace(/"/g, '&quot;')}"` : '';
       return `
-        <li class="${cls.join(' ')}" data-start="${d.startYear}" data-idx="${d.index}">
-          <span class="dx-age">${d.startAge}–${d.endAge} 歲</span>
+        <li class="${cls.join(' ')}" data-start="${d.startYear}" data-idx="${d.index}"${tip}>
+          <span class="dx-age">${d.startAge}–${d.endAge} 岁</span>
           <span class="dx-palace">${d.palaceLabel}</span>
+          ${stars}
           <span class="dx-title">${d.title}</span>
           <span class="dx-years">${d.startYear}–${d.endYear}</span>
           ${badge}
@@ -1194,6 +1208,10 @@
       toast('这个阶段超出可查看范围', 'warn');
       return;
     }
+
+    // 先在时间轴下方展开这一段的完整说明（含本命星曜）
+    showDaxianDetail(Number(item.dataset.idx));
+
     el.liunianYear.value = startYear;
     renderLiunian();
     // 把流年面板带到视野里，让用户看到点选结果
@@ -1201,6 +1219,48 @@
       try { el.yearPanel.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (err) { }
     }
     toast(`已跳到 ${startYear} 年（${item.querySelector('.dx-age').textContent}）`, 'ok');
+  }
+
+  /**
+   * 展开某一段大限的详细说明。
+   * 数据来自 buildDaxianTimeline 的 note/stars/sha，
+   * 内容随本命盘变化，不是通用模板。
+   */
+  function showDaxianDetail(index) {
+    if (!el.daxianDetail) return;
+    const a = state.chart;
+    if (!a) return;
+
+    const birthLunarYear = a.rawDates && a.rawDates.lunarDate
+      ? a.rawDates.lunarDate.lunarYear
+      : Number(a.solarDate.slice(0, 4));
+    const ZW = window.ZWInterpret;
+    if (!ZW) return;
+
+    const list = ZW.buildDaxianTimeline(
+      a, birthLunarYear, state.liunianYear, new Date().getFullYear());
+    const d = list.find((x) => x.index === index);
+    if (!d) { el.daxianDetail.hidden = true; return; }
+
+    const realYear = new Date().getFullYear();
+    const relation = d.isNow ? '你现在就在这一段'
+      : (realYear > d.endYear ? '这一段已经走过' : '这一段还没到');
+
+    el.daxianDetail.innerHTML = `
+      <div class="dd-head">
+        <span class="dd-range">${d.startAge}–${d.endAge} 岁</span>
+        <span class="dd-years">${d.startYear}–${d.endYear}</span>
+        <span class="dd-rel">${relation}</span>
+      </div>
+      <p class="dd-note">${d.note}</p>
+      <div class="dd-meta">
+        <span>大限宫位 <strong>${d.palaceLabel}</strong></span>
+        <span>大限干支 <strong>${d.ganZhi}</strong></span>
+        ${d.stars.length ? `<span>本命主星 <strong>${d.stars.join('、')}</strong></span>` : ''}
+        ${d.sha.length ? `<span>本命煞星 <strong>${d.sha.join('、')}</strong></span>` : ''}
+      </div>
+    `;
+    el.daxianDetail.hidden = false;
   }
 
   /* ---------------- 合盘 ---------------- */
@@ -1311,7 +1371,7 @@
           <span class="cp-link-mark">合</span>
         </div>
         <div class="cp-side">
-          <span class="cp-who">對方</span>
+          <span class="cp-who">对方</span>
           <span class="cp-star">${esc(youStars)}</span>
           <span class="cp-meta">${esc(b.gender)} · ${esc(b.solarDate)} · ${esc(b.time || '')}</span>
         </div>
@@ -1323,10 +1383,10 @@
       </div>
 
       <div class="compat-table-wrap">
-        <h3 class="compat-sub">逐宮對照</h3>
+        <h3 class="compat-sub">逐宫对照</h3>
         <table class="compat-table">
           <thead>
-            <tr><th>宮位</th><th>你</th><th>對方</th></tr>
+            <tr><th>宫位</th><th>你</th><th>对方</th></tr>
           </thead>
           <tbody>
             ${comp.rows.map((r) => `
@@ -1343,8 +1403,8 @@
       </div>
 
       <div class="compat-charts">
-        <h3 class="compat-sub">雙盤並排</h3>
-        <p class="compat-hint">兩張完整命盤對照看，宮位位置一一對應。可左右滑動。</p>
+        <h3 class="compat-sub">双盘并排</h3>
+        <p class="compat-hint">两张完整命盤对照看，宫位位置一一对应。可左右滑动。</p>
         <div class="dual-scroll">
           <div class="dual-chart">
             <p class="dual-label">你 · ${esc(me.gender)} · ${esc(me.solarDate)}</p>
@@ -1354,10 +1414,10 @@
     })}</div>
           </div>
           <div class="dual-chart">
-            <p class="dual-label">對方 · ${esc(b.gender)} · ${esc(b.solarDate)}</p>
+            <p class="dual-label">对方 · ${esc(b.gender)} · ${esc(b.solarDate)}</p>
             <div class="chart is-static">${buildChartHTML(b, {
       showDecadal: false, showMarks: true, interactive: false, compact: true,
-      title: '對方',
+      title: '对方',
     })}</div>
           </div>
         </div>
@@ -1452,7 +1512,7 @@
       el.hourBlock.hidden = false;
       // 标题在 <summary> 里（折叠状态下也能看到落宫）
       if (el.hourFoldTitle) {
-        el.hourFoldTitle.textContent = `${hour.ganZhi}時 · 落${hour.palaceName}宫`;
+        el.hourFoldTitle.textContent = `${hour.ganZhi}时 · 落${hour.palaceName}宫`;
       }
       if (el.hourLead) el.hourLead.textContent = hour.headline;
       if (el.hourHua) {
@@ -1468,8 +1528,8 @@
     if (el.dayMeta) {
       el.dayMeta.innerHTML = `
         <span class="ln-meta-item">流日 <strong>${day ? day.ganZhi : '—'}</strong></span>
-        <span class="ln-meta-item">落宮 <strong>${day ? day.palaceName + '宮' : '—'}</strong></span>
-        <span class="ln-meta-item">流時 <strong>${hour ? hour.ganZhi : '—'}</strong></span>
+        <span class="ln-meta-item">落宫 <strong>${day ? day.palaceName + '宫' : '—'}</strong></span>
+        <span class="ln-meta-item">流时 <strong>${hour ? hour.ganZhi : '—'}</strong></span>
       `;
     }
     // 注意：跨年同步由 onDayChange() 统一处理（走完整的 renderLiunian），
@@ -2056,6 +2116,74 @@
         </li>`).join('')
       : '<li class="focus-empty">这张盘的四化标记较少，可直接看盘面。</li>';
 
+    // 十二宫逐宫解读
+    // 这是本命解读信息量最大的部分：只看命宫全天下只有十几种结果，
+    // 逐宫展开之后每张盘的差异才真正体现出来。
+    if (el.palaceGrid) {
+      const list = rd.palaceReadings || [];
+      el.palaceGrid.innerHTML = list.map((p, i) => {
+        const huaHtml = p.hua.length
+          ? `<span class="pg-hua">${p.hua.map((h) =>
+            `<span class="tag tag-${HUA_KEY[h.hua]}">${h.hua}</span>`).join('')}</span>`
+          : '';
+        const starsHtml = p.major.length
+          ? p.major.map((s) => `<span class="pg-star">${s}</span>`).join('')
+          : '<span class="pg-star is-empty">无主星</span>';
+        const auxHtml = p.aux.length
+          ? `<span class="pg-aux">${p.aux.join('、')}</span>` : '';
+        const shaHtml = p.sha.length
+          ? `<span class="pg-sha">${p.sha.join('、')}</span>` : '';
+        // 借对宫时明确标注，不让用户以为这一宫真有那颗星
+        const borrowTag = p.borrowedCtx
+          ? `<span class="pg-borrow">借对宫「${p.ctxFrom.replace('（借对宫）', '')}」</span>` : '';
+
+        return `
+          <details class="palace-card" ${i === 0 ? 'open' : ''}>
+            <summary>
+              <span class="pg-head">
+                <span class="pg-name">${p.label}</span>
+                <span class="pg-title">${p.title}</span>
+                ${p.isBody ? '<span class="pg-body">身宫</span>' : ''}
+              </span>
+              <span class="pg-stars">${starsHtml}${huaHtml}</span>
+            </summary>
+            <div class="pg-body-wrap">
+              ${borrowTag}
+              ${p.good ? `<p class="pg-line"><span class="pg-k">优势</span>${p.good}</p>` : ''}
+              ${p.issue ? `<p class="pg-line"><span class="pg-k is-issue">课题</span>${p.issue}</p>` : ''}
+              ${p.advice ? `<p class="pg-line"><span class="pg-k is-tip">建议</span>${p.advice}</p>` : ''}
+              <p class="pg-what">${p.what}</p>
+              ${(auxHtml || shaHtml) ? `<p class="pg-minor">${auxHtml}${shaHtml}</p>` : ''}
+              ${p.provKind === 'source'
+            ? `<p class="pg-prov is-source" title="《紫微斗数精成》第九章原文">
+                     <span class="pg-prov-k">原书依据</span>${(p.provQuote || '').slice(0, 110)}…
+                   </p>`
+            : `<p class="pg-prov is-derived">
+                     <span class="pg-prov-k">推算说明</span>原书第九章未单列这一组合，本条由星性推导而来。
+                   </p>`}
+            </div>
+          </details>`;
+      }).join('');
+    }
+
+    // ===== 同盘区分（日干四化）=====
+    // 紫微斗数的星盘由紫微位置锚定，而紫微位置 = f(农历日, 五行局)。
+    // 所以不同出生日期可能排出同一张盘。这里告诉用户为什么，
+    // 并给出原书承认的辅助区分依据。
+    if (el.sameChartBlock) {
+      const sc = rd.sameChartNote;
+      if (sc) {
+        el.sameChartBlock.hidden = false;
+        el.sameChartExplain.textContent = sc.explain;
+        el.sameChartHead.textContent = sc.headline;
+        el.sameChartList.innerHTML = sc.sentences
+          .map((s) => `<li>${s}</li>`).join('');
+        el.sameChartCaveat.textContent = sc.caveat + ' 依据：' + sc.src;
+      } else {
+        el.sameChartBlock.hidden = true;
+      }
+    }
+
     // 分段入场：这是起盘后最先读的内容，按阅读顺序依次浮起
     if (state.playEnter && !motionOff()) {
       el.readingPanel.classList.remove('is-enter');
@@ -2509,6 +2637,7 @@
           <div style="color:var(--gold-dim);letter-spacing:.1em;margin-bottom:2px">本命四化</div>
           ${huaLine(benmingSihua)}
         </div>
+        ${o.showBrand === false ? '' : '<div class="center-brand" aria-hidden="true">FANSTAR</div>'}
       </div>
     `;
   }
@@ -2592,9 +2721,15 @@
                   ${x.hua ? `<span class="tag tag-${HUA_KEY[x.hua]}">${x.hua}</span>` : ''}
                 </div>
                 <p class="plain-essence">${x.info.essence}</p>
+                ${x.info.classic ? `
+                  <p class="plain-classic">
+                    <span class="pc-k">原书定性</span>${x.info.classic}
+                  </p>` : ''}
                 ${x.info.good ? `<p class="plain-row"><span>优势</span>${x.info.good}</p>` : ''}
                 ${x.info.issue ? `<p class="plain-row"><span>课题</span>${x.info.issue}</p>` : ''}
                 ${x.info.advice ? `<p class="plain-row is-tip"><span>建议</span>${x.info.advice}</p>` : ''}
+                ${x.info.classicNote ? `
+                  <p class="plain-note">${x.info.classicNote}</p>` : ''}
               </div>
             `).join('')}
           </div>

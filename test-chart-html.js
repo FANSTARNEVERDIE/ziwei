@@ -228,6 +228,33 @@ let allOk = true;
 });
 t('所有命例结构正确', allOk);
 
+console.log('\n=== 中心区品牌水印 ===\n');
+
+const withBrand = build(A, {});
+t('默认含 center-brand', withBrand.includes('center-brand'));
+t('水印文本为 FANSTAR', /<div class="center-brand"[^>]*>FANSTAR<\/div>/.test(withBrand));
+
+const noBrand = build(A, { showBrand: false });
+t('showBrand:false 时不渲染', !noBrand.includes('center-brand'));
+
+// 水印必须在中心区结构内，不能跑到某个宫位格里。
+// 中心区跨 2 行 2 列，用它的 grid 定位串来界定范围，
+// 不能靠 <div> 配对（嵌套 div 会让简单正则失配）。
+const centerStart = withBrand.indexOf('grid-row:2 / 4;grid-column:2 / 4');
+const brandPos = withBrand.indexOf('center-brand');
+// 中心区之后的下一个宫位格起点
+const nextCell = withBrand.indexOf('class="cell', centerStart);
+t('水印位于中心区内部',
+  centerStart >= 0 && brandPos > centerStart && (nextCell < 0 || brandPos < nextCell),
+  '中心区起点=' + centerStart + ' 水印=' + brandPos + ' 下一格=' + nextCell);
+
+// 对比盘（compact + 非交互）也应带水印，因为它同样会被导出
+const compactBrand = build(A, { compact: true, interactive: false });
+t('对比盘也带水印', compactBrand.includes('center-brand'));
+
+// 水印不能影响宫位格数
+t('加品牌后仍是 12 格', (compactBrand.match(/class="cell[ "]/g) || []).length === 12);
+
 console.log('\n=== 与主盘一致性 ===\n');
 // 主盘渲染一次，确认用的是同一函数（结构应与 build 输出一致）
 ids.chart.innerHTML = html;

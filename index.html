@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a0908">
 <meta name="color-scheme" content="dark">
-<title>紫微斗數 · 星盤排盤</title>
+<title>紫微斗數 · 星盤排盘</title>
 <meta name="description" content="紫微斗数在线排盘：支持阳历农历、真太阳时校正，完整呈现十二宫、十四主星、四化、大限流年小限。纯本地运算，不上传生辰，可离线使用。">
-<meta property="og:title" content="紫微斗數 · 星盤排盤">
+<meta property="og:title" content="紫微斗數 · 星盤排盘">
 <meta property="og:description" content="输入生辰，即刻铺陈十二宫星曜、大限与流年。纯本地运算，不上传生辰。">
 <meta property="og:type" content="website">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -37,7 +37,7 @@
     </a>
     <div class="nav-actions">
       <button type="button" class="nav-link" id="navDemo">示例命盤</button>
-      <button type="button" class="nav-link" id="navReset">重新起盤</button>
+      <button type="button" class="nav-link" id="navReset">重新起盘</button>
     </div>
   </div>
 </nav>
@@ -46,6 +46,18 @@
 
   <!-- ========== 输入表单 ========== -->
   <section class="panel form-panel" id="formPanel">
+
+    <!-- 首屏说明：让第一次来的人立刻知道这是干什么的、能看懂 -->
+    <header class="form-hero">
+      <h1 class="hero-title">紫微斗數</h1>
+      <p class="hero-sub">输入生辰，十二宫星曜、大限流年一次铺开</p>
+      <ul class="hero-points">
+        <li><span class="hp-key">说人话</span>31 颗星逐颗白话解释</li>
+        <li><span class="hp-key">不上传</span>全部在本机运算</li>
+        <li><span class="hp-key">能离线</span>断网也能排盘</li>
+      </ul>
+    </header>
+
     <form id="chartForm" autocomplete="off">
       <div class="form-grid">
 
@@ -112,7 +124,7 @@
 
       <div class="form-actions">
         <button type="submit" class="btn-primary" id="submitBtn">
-          <span class="btn-label">起 盤</span>
+          <span class="btn-label">起 盘</span>
           <span class="btn-icon" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/>
@@ -174,7 +186,7 @@
               <path d="M9.2 10.2c1.9.2 3.4 1.5 3.4 3"/>
             </svg>
           </span>
-          <span class="act-label">合盤對照</span>
+          <span class="act-label">合盘对照</span>
         </button>
         <button type="button" class="act-btn" id="actStars">
           <span class="act-ico" aria-hidden="true">
@@ -230,8 +242,33 @@
         <ul class="focus-list" id="readingFocus"></ul>
       </div>
 
+      <!-- 十二宫逐宫解读 -->
+      <div class="reading-palaces">
+        <h3 class="reading-sub">十二宫逐宫看</h3>
+        <p class="reading-hint">
+          一张盘是一整套配置，不是只看一颗星。下面把你十二个宫位逐个说清楚——
+          每一条都根据「这一宫在你盘里放了什么星」来写，同样一颗星落在不同宫位，说法不一样。
+        </p>
+        <div class="palace-grid" id="palaceGrid"></div>
+      </div>
+
+      <!-- 同盘区分：日干四化（原书承认的辅助看法） -->
+      <div class="reading-samechart" id="sameChartBlock" hidden>
+        <h3 class="reading-sub">同盘者的区别</h3>
+        <p class="reading-hint" id="sameChartExplain"></p>
+        <p class="sc-head" id="sameChartHead"></p>
+        <ul class="sc-list" id="sameChartList"></ul>
+        <p class="sc-caveat" id="sameChartCaveat"></p>
+      </div>
+
       <p class="reading-disclaimer">
-        以上是紫微斗数的传统解读，属文化参考。它描述的是倾向，不是定论——你可以选择怎么用它。
+        <strong>这些解读文字是怎么来的：</strong>
+        排盘结果（星曜位置、四化、大限）由开源排盘引擎按传统规则计算，可与其他排盘工具交叉核对；
+        四化的性质与「化忌不一定凶」的庙陷例外，依《紫微斗数精成》原文判断
+        （术语词典与代码中保留了原文出处）。
+        至于每颗星的性格描述与建议，是本站把原书义理改写的现代白话，
+        <em>不是古籍原文，各家说法也不尽相同</em>。
+        它提供的是一个思考自己的角度，不是定论，更不是命定。
       </p>
     </section>
 
@@ -261,7 +298,7 @@
         <button type="button" class="btn-mini" id="dayToday">今天</button>
 
         <span class="ln-sep" aria-hidden="true"></span>
-        <label class="ln-label ln-label-sm" for="liunianHour">流時</label>
+        <label class="ln-label ln-label-sm" for="liunianHour">流时</label>
         <select class="ln-month" id="liunianHour" aria-label="流时时辰"></select>
       </div>
       <div class="day-right" id="dayMeta"></div>
@@ -294,7 +331,7 @@
       <!-- 流时：时间颗粒度最细，层级也最深，默认收起避免四段并列造成信息过载 -->
       <details class="hour-fold" id="hourFold">
         <summary>
-          <span class="hf-label">流時</span>
+          <span class="hf-label">流时</span>
           <span class="hf-title" id="hourFoldTitle"></span>
         </summary>
         <div class="hour-inner" id="hourBlock">
@@ -314,6 +351,8 @@
         </p>
       </header>
       <ol class="daxian-track" id="daxianTrack"></ol>
+      <!-- 点某一段后展开这一段的完整说明（内容随本命盘而定） -->
+      <div class="daxian-detail" id="daxianDetail" hidden aria-live="polite"></div>
     </section>
 
     <!-- 星盘 -->
@@ -358,19 +397,53 @@
 
   </section>
 
-  <!-- 空态：用十二宫线框预告起盘后的形态（紫微斗数用十二宫，非八卦） -->
+  <!-- 空态：起盘前展示能力，说明这个站和别的排盘站有什么不同 -->
   <section class="empty-state" id="emptyState">
-    <div class="empty-chart" aria-hidden="true">
-      <span></span><span></span><span></span><span></span>
-      <span></span><i></i><i></i><span></span>
-      <span></span><i></i><i></i><span></span>
-      <span></span><span></span><span></span><span></span>
+    <div class="empty-head">
+      <div class="empty-chart" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+        <span></span><i></i><i></i><span></span>
+        <span></span><i></i><i></i><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="empty-copy">
+        <h2 class="empty-title">十二宫星曜<br>待你起盘</h2>
+        <p class="empty-sub">填入出生年月日时，本命盤、大限与流年即刻铺陳。</p>
+        <p class="empty-hint">或先看一张示例命盤</p>
+      </div>
     </div>
-    <div class="empty-copy">
-      <h2 class="empty-title">十二宮星曜<br>待你起盤</h2>
-      <p class="empty-sub">填入出生年月日時，本命盤、大限與流年即刻鋪陳。生辰僅在本機運算。</p>
-      <p class="empty-hint">或先看一張示例命盤</p>
-    </div>
+
+    <!-- 能力展示：把「和别的排盘站不一样」的地方讲清楚 -->
+    <ul class="feature-strip">
+      <li>
+        <span class="fs-ico" aria-hidden="true">譯</span>
+        <div class="fs-body">
+          <strong>把术语翻成人话</strong>
+          <span>31 颗星逐颗解释，每个术语点一下就有注解</span>
+        </div>
+      </li>
+      <li>
+        <span class="fs-ico" aria-hidden="true">历</span>
+        <div class="fs-body">
+          <strong>閏月也不排錯</strong>
+          <span>閏月与平月排出的盘不同，选择权交给你</span>
+        </div>
+      </li>
+      <li>
+        <span class="fs-ico" aria-hidden="true">时</span>
+        <div class="fs-body">
+          <strong>年 · 月 · 日 · 时四層</strong>
+          <span>大限时间轴可视化，点一段就跳到那个时期</span>
+        </div>
+      </li>
+      <li>
+        <span class="fs-ico" aria-hidden="true">合</span>
+        <div class="fs-body">
+          <strong>合盘双盘并排</strong>
+          <span>两张完整命盤宫位一一对应，还可匯出成圖</span>
+        </div>
+      </li>
+    </ul>
   </section>
 
 </main>
@@ -393,7 +466,7 @@
 <aside class="drawer glossary" id="glossary" hidden aria-label="术语词典">
   <div class="drawer-head">
     <div>
-      <h2>術語詞典</h2>
+      <h2>术语词典</h2>
       <p>紫微斗数里那些看不懂的词，这里都有人话解释</p>
     </div>
     <button type="button" class="drawer-close" id="glossaryClose" aria-label="关闭">✕</button>
@@ -450,7 +523,7 @@
 <div class="modal compat-modal" id="compatModal" hidden role="dialog" aria-label="合盘对照" aria-modal="true">
   <header class="modal-head">
     <div>
-      <h2>合盤對照</h2>
+      <h2>合盘对照</h2>
       <p>填入另一个人的生辰，看两人的相处倾向</p>
     </div>
     <button type="button" class="drawer-close" id="compatClose" aria-label="关闭">✕</button>
@@ -459,7 +532,7 @@
     <!-- 第二人输入 -->
     <div class="compat-form" id="compatForm">
       <div class="cf-row">
-        <span class="cf-person">對方</span>
+        <span class="cf-person">对方</span>
         <div class="seg" data-name="cgender">
           <button type="button" class="seg-btn active" data-val="女">女</button>
           <button type="button" class="seg-btn" data-val="男">男</button>
@@ -477,19 +550,19 @@
         </div>
       </div>
       <div class="cf-row cf-row-top">
-        <span class="cf-person">時辰</span>
+        <span class="cf-person">时辰</span>
         <div class="shichen-grid cf-shichen" id="cShichenGrid"></div>
       </div>
       <div class="cf-actions">
         <button type="button" class="btn-primary btn-sm" id="compatGo">
-          <span class="btn-label">開始對照</span>
+          <span class="btn-label">开始对照</span>
           <span class="btn-icon" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"/>
             </svg>
           </span>
         </button>
-        <button type="button" class="btn-ghost" id="compatFromFav">從收藏選</button>
+        <button type="button" class="btn-ghost" id="compatFromFav">从收藏选</button>
       </div>
       <p class="cf-hint" id="compatHint"></p>
     </div>
@@ -498,7 +571,7 @@
     <div class="compat-result" id="compatResult" hidden></div>
   </div>
   <footer class="modal-foot" id="compatFoot" hidden>
-    <button type="button" class="btn-ghost" id="compatBack">重新填寫</button>
+    <button type="button" class="btn-ghost" id="compatBack">重新填写</button>
   </footer>
 </div>
 
@@ -539,6 +612,15 @@
 </div>
 
 <footer class="site-footer">
+  <!-- FANSTAR 署名 -->
+  <div class="brand-sign">
+    <span class="bs-mark" aria-hidden="true"><i></i></span>
+    <span class="bs-text">
+      <strong>FANSTAR</strong>
+      <small>紫微斗數排盘</small>
+    </span>
+  </div>
+
   <p class="footer-note">生辰信息仅在本机浏览器内用于排盘，不会上传或存储。</p>
   <p>排盘引擎 <a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener">iztro</a> · 命理内容为传统文化参考，不构成决策依据</p>
 </footer>
@@ -547,6 +629,13 @@
 <script src="js/store.js"></script>
 <script src="js/lunar-table.js"></script>
 <script src="js/leap.js"></script>
+<script src="js/star-palace.js"></script>
+<script src="js/star-palace-provenance.js"></script>
+<script src="js/sihua-star.js"></script>
+<script src="js/sihua-exception.js"></script>
+<script src="js/sihua-corrected.js"></script>
+<script src="js/chart-print.js"></script>
+<script src="js/day-layer.js"></script>
 <script src="js/interpret.js"></script>
 <script src="js/export.js"></script>
 <script src="js/app.js"></script>

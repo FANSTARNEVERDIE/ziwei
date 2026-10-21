@@ -293,12 +293,69 @@ body {
 }
 .field-wide { grid-column: 1 / -1; }
 
+/* ---------- 首屏说明 ---------- */
+/* 表单面板本身信息密度低，顶上补一段说明：
+   第一次来的人要立刻知道这是什么、跟别的排盘站有什么不同。 */
+.form-hero {
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--gold-line-soft);
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: var(--gold-bright);
+  margin: 0 0 8px;
+  text-shadow: 0 2px 20px rgba(184,148,74,0.18);
+}
+.hero-sub {
+  font-size: 14px;
+  color: var(--txt-2);
+  letter-spacing: 0.04em;
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+.hero-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* 三栏等宽。用 auto-fit+minmax 会让列宽不均，
+     导致「生辰不出你的瀏覽器」这类短语折行很难看 */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 26px;
+}
+.hero-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--txt-3);
+  min-width: 0;
+}
+.hp-key {
+  flex-shrink: 0;
+  font-family: var(--serif);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  padding: 1px 7px;
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-xs);
+  background: rgba(184,148,74,0.06);
+  /* 与首行文字基线对齐 */
+  margin-top: 1px;
+}
+
 .field > label {
   display: block;
   font-size: 12px;
   letter-spacing: 0.16em;
   color: var(--gold);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-weight: 500;
 }
 .label-sub { color: var(--txt-3); letter-spacing: 0; font-size: 11px; font-weight: 400; }
@@ -447,7 +504,9 @@ body {
 .form-actions {
   display: flex;
   gap: 12px;
-  margin-top: 26px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gold-line-soft);
   align-items: center;
 }
 .btn-primary {
@@ -1135,14 +1194,18 @@ body {
    用十二宫线框作为视觉，直接预告起盘后的盘面形态。
    采用左右非对称构图，避免与页面的其它居中块形成「三重居中」。 */
 .empty-state {
-  padding: 46px 20px 64px;
+  padding: 30px 0 10px;
   color: var(--txt-3);
+}
+/* 上半：线框预告 + 文案 */
+.empty-head {
   display: grid;
-  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
   align-items: center;
-  gap: 52px;
-  max-width: 800px;
-  margin: 0 auto;
+  gap: 44px;
+  max-width: 760px;
+  margin: 0 auto 26px;
+  padding: 0 20px;
 }
 .empty-chart {
   width: 100%;
@@ -1186,6 +1249,64 @@ body {
 @keyframes emptyCell {
   0%, 100% { border-color: rgba(184, 148, 74, 0.38); }
   50% { border-color: rgba(220, 187, 110, 0.68); }
+}
+
+/* ---------- 能力展示 ---------- */
+/* 起盘前把「和别的排盘站不同」的四点讲清楚，
+   比单纯放一个空线框有用。 */
+.feature-strip {
+  list-style: none;
+  margin: 0 auto;
+  padding: 22px 20px 0;
+  border-top: 1px solid var(--gold-line-soft);
+  display: grid;
+  /* 四项固定两栏：用 auto-fit 会变成 3+1，落单那项很难看 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 34px;
+  max-width: 860px;
+}
+.feature-strip li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.fs-ico {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--gold);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-sm);
+  background: linear-gradient(160deg, rgba(184,148,74,0.09), rgba(184,148,74,0.01));
+  transition: color 0.2s var(--ease-glide), border-color 0.2s var(--ease-glide);
+}
+.feature-strip li:hover .fs-ico {
+  color: var(--gold-bright);
+  border-color: rgba(184,148,74,0.5);
+}
+.fs-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.fs-body strong {
+  font-family: var(--serif);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--txt-1);
+}
+.fs-body span {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--txt-3);
+  text-wrap: pretty;
 }
 
 .empty-copy { text-align: left; min-width: 0; }
@@ -1354,6 +1475,76 @@ body {
 .site-footer a:hover {
   color: var(--gold-bright);
   border-bottom-color: rgba(184,148,74,0.45);
+}
+
+/* ---------- FANSTAR 署名 ---------- */
+/* 页脚品牌块：有存在感但不喧宾夺主。
+   图形用「方框 + 中心点」，与盘面十二宫的方框语言一致。 */
+.brand-sign {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 9px 20px 9px 14px;
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-md);
+  background: linear-gradient(160deg, rgba(184,148,74,0.07), rgba(184,148,74,0.01));
+  transition: border-color 0.2s var(--ease-glide), background 0.2s var(--ease-glide);
+}
+.brand-sign:hover {
+  border-color: rgba(184,148,74,0.45);
+  background: linear-gradient(160deg, rgba(184,148,74,0.11), rgba(184,148,74,0.02));
+}
+.bs-mark {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(184,148,74,0.7);
+  border-radius: 2px;
+}
+.bs-mark i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+}
+.bs-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  line-height: 1.2;
+}
+.bs-text strong {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--gold-bright);
+}
+.bs-text small {
+  font-family: var(--serif);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: var(--gold-dim);
+}
+
+/* 盘面中心区的水印：截图与导出都会带上，位置要低存在感 */
+.center-brand {
+  margin-top: 8px;
+  font-family: var(--sans);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--gold-dim);
+  opacity: 0.55;
+  text-align: center;
+  user-select: none;
 }
 
 /* ============================================================
@@ -2855,6 +3046,302 @@ body {
 }
 .hint.is-warn { color: #d9a08f; }
 
+/* ---------- 大限详情 ---------- */
+.daxian-detail {
+  margin-top: 16px;
+  padding: 15px 18px;
+  background: linear-gradient(160deg, rgba(184,148,74,0.08), rgba(184,148,74,0.01));
+  border: 1px solid rgba(184,148,74,0.3);
+  border-radius: var(--r-md);
+  animation: ddIn 0.32s var(--ease-spring);
+}
+@keyframes ddIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.dd-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.dd-range {
+  font-family: var(--serif);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+}
+.dd-years {
+  font-size: 12px;
+  color: var(--txt-3);
+  font-variant-numeric: tabular-nums;
+}
+.dd-rel {
+  font-size: 11.5px;
+  color: var(--gold);
+  padding: 1px 8px;
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-xs);
+  background: rgba(184,148,74,0.07);
+}
+.dd-note {
+  font-size: 13.5px;
+  line-height: 1.95;
+  color: var(--txt-1);
+  text-wrap: pretty;
+  margin: 0 0 12px;
+}
+.dd-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding-top: 11px;
+  border-top: 1px solid var(--gold-line-soft);
+  font-size: 12px;
+  color: var(--txt-3);
+}
+.dd-meta strong {
+  color: var(--gold-bright);
+  font-weight: 500;
+}
+
+/* 时间轴条目上的本命星曜 */
+.dx-stars {
+  display: block;
+  font-size: 10.5px;
+  color: var(--gold-dim);
+  letter-spacing: 0.04em;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dx-stars.is-empty { color: var(--txt-3); opacity: 0.7; }
+
+/* ---------- 十二宫逐宫解读 ---------- */
+.reading-palaces { margin-top: 26px; }
+.palace-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.palace-card {
+  border: 1px solid var(--gold-line-soft);
+  border-radius: var(--r-sm);
+  background: linear-gradient(165deg, rgba(184,148,74,0.05), rgba(184,148,74,0.01));
+  overflow: hidden;
+  transition: border-color 0.2s var(--ease-glide);
+}
+.palace-card:hover { border-color: rgba(184,148,74,0.36); }
+.palace-card[open] { border-color: rgba(184,148,74,0.42); }
+.palace-card > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.palace-card > summary::-webkit-details-marker { display: none; }
+.pg-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pg-name {
+  font-family: var(--serif);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+}
+.pg-title { font-size: 11.5px; color: var(--txt-3); }
+.pg-body {
+  font-size: 10px;
+  padding: 0 5px;
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-xs);
+  color: var(--gold);
+}
+.pg-stars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pg-star {
+  font-family: var(--serif);
+  font-size: 12.5px;
+  color: var(--txt-1);
+}
+.pg-star.is-empty { color: var(--txt-3); font-size: 11px; }
+.pg-hua { display: inline-flex; gap: 2px; }
+
+.pg-body-wrap {
+  padding: 0 13px 12px;
+  border-top: 1px solid var(--gold-line-soft);
+  padding-top: 10px;
+}
+.pg-borrow {
+  display: inline-block;
+  font-size: 10.5px;
+  color: var(--gold-dim);
+  padding: 1px 7px;
+  border: 1px dashed rgba(184,148,74,0.4);
+  border-radius: var(--r-xs);
+  margin-bottom: 8px;
+}
+.pg-line {
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--txt-1);
+  margin: 0 0 6px;
+  display: flex;
+  gap: 7px;
+  text-wrap: pretty;
+}
+.pg-k {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--jade);
+  padding-top: 2px;
+}
+.pg-k.is-issue { color: var(--cinnabar-bright); }
+.pg-k.is-tip { color: var(--gold); }
+.pg-what {
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: var(--txt-3);
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed var(--gold-line-soft);
+  text-wrap: pretty;
+}
+.pg-minor {
+  font-size: 11px;
+  color: var(--txt-3);
+  margin: 6px 0 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pg-aux { color: var(--jade); opacity: 0.85; }
+.pg-sha { color: var(--cinnabar); opacity: 0.9; }
+
+/* 原书定性标注 */
+.plain-classic {
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--txt-2);
+  margin: 6px 0 8px;
+  padding: 7px 10px;
+  background: rgba(184, 148, 74, 0.06);
+  border-left: 2px solid var(--gold-dim);
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
+  text-wrap: pretty;
+}
+.pc-k {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin-right: 7px;
+}
+.plain-note {
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--txt-3);
+  margin: 8px 0 0;
+  padding-top: 7px;
+  border-top: 1px dashed var(--gold-line-soft);
+  text-wrap: pretty;
+}
+
+/* 来源标注：区分「原书有论述」与「由星性推导」 */
+.pg-prov {
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 9px 0 0;
+  padding: 7px 9px;
+  border-radius: var(--r-xs);
+  text-wrap: pretty;
+}
+.pg-prov.is-source {
+  color: var(--txt-2);
+  background: rgba(184, 148, 74, 0.07);
+  border-left: 2px solid var(--gold-dim);
+}
+.pg-prov.is-derived {
+  color: var(--txt-3);
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+}
+.pg-prov-k {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  margin-right: 6px;
+  padding: 0 5px;
+  border-radius: var(--r-xs);
+}
+.pg-prov.is-source .pg-prov-k {
+  color: var(--gold-bright);
+  border: 1px solid var(--gold-line);
+}
+.pg-prov.is-derived .pg-prov-k {
+  color: var(--txt-3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- 同盘区分（日干四化） ---------- */
+.reading-samechart {
+  margin-top: 26px;
+  padding: 16px 18px;
+  border: 1px solid var(--gold-line-soft);
+  border-radius: var(--r-sm);
+  background: linear-gradient(165deg, rgba(184, 148, 74, 0.055), rgba(184, 148, 74, 0.008));
+}
+.sc-head {
+  font-size: 13.5px;
+  color: var(--gold-bright);
+  margin: 12px 0 9px;
+  letter-spacing: 0.02em;
+}
+.sc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+.sc-list li {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--txt-1);
+  padding: 6px 0 6px 15px;
+  position: relative;
+  text-wrap: pretty;
+}
+.sc-list li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 14px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold-dim);
+}
+.sc-caveat {
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--txt-3);
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px dashed var(--gold-line-soft);
+  text-wrap: pretty;
+}
+
 /* ---------- 响应式 ---------- */
 @media (max-width: 720px) {
   .container { padding: 16px 10px 50px; }
@@ -2898,6 +3385,25 @@ body {
   .btn-primary { width: 100%; padding: 13px 20px; letter-spacing: 0.2em; }
   .form-actions { flex-direction: column; align-items: stretch; }
   .legend-bar { gap: 12px; padding: 13px 15px; font-size: 11px; }
+
+  /* 首屏说明与能力展示在窄屏 */
+  .hero-points { grid-template-columns: 1fr; gap: 6px; }
+  .hero-title { letter-spacing: 0.16em; }
+  .form-hero { padding-bottom: 16px; margin-bottom: 18px; }
+
+  .empty-head {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .empty-chart { max-width: 190px; margin: 0 auto; }
+  .empty-copy { text-align: center; }
+  .feature-strip {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 18px 20px 0;
+  }
 
   /* 闰月在窄屏 */
   .leap-row { flex-direction: column; align-items: flex-start; gap: 7px; padding: 10px 12px; }

@@ -11,7 +11,9 @@
     "test:sw": "node tools/run-sw-test.js",
     "check": "node tools/check-ids.js",
     "icons": "node tools/make-icons.js",
-    "leap": "node tools/gen-leap-table.js"
+    "leap": "node tools/gen-leap-table.js",
+    "zip": "node tools/make-zip.js",
+    "release": "node tools/build-dist.js && node tools/make-zip.js"
   },
   "//": "iztro 仅测试脚本使用（Node 环境做对照验证）。浏览器端加载的是 vendor/iztro.min.js，不依赖 node_modules。因此放在 devDependencies，避免部署平台构建时下载无用依赖。",
   "devDependencies": {

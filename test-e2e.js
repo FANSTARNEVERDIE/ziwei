@@ -69,6 +69,8 @@ const mk = (id) => (ids[id] = new El());
   'drawerTitle', 'drawerSub', 'drawerBody', 'drawerClose',
   // 白话解读相关
   'readingPanel', 'readingLead', 'readingTags', 'readingBlocks', 'readingFocus',
+  'palaceGrid',
+  'sameChartBlock', 'sameChartExplain', 'sameChartHead', 'sameChartList', 'sameChartCaveat',
   'yearPanel', 'yearTitle', 'yearLead', 'yearDaxian', 'yearHua',
   'guideList', 'openGlossary', 'glossary', 'glossaryMask', 'glossaryClose',
   'glossSearch', 'glossList', 'termPop', 'termPopName', 'termPopText', 'termPopClose',
@@ -76,7 +78,7 @@ const mk = (id) => (ids[id] = new El());
   'favList', 'favSub', 'favClear', 'toast',
   'actExport', 'actPrint', 'exportModal', 'exportMask', 'exportPreview',
   'exportClose', 'exportCancel', 'exportDownload',
-  'liunianMonth', 'monthBlock', 'monthTitle', 'monthLead', 'monthHua', 'daxianTrack',
+  'liunianMonth', 'monthBlock', 'monthTitle', 'monthLead', 'monthHua', 'daxianTrack', 'daxianDetail',
   'actStars', 'starDrawer', 'starMask', 'starClose', 'starSearch', 'starList',
   'actCompat', 'compatModal', 'compatMask', 'compatClose', 'compatForm', 'compatResult',
   'compatFoot', 'compatGo', 'compatBack', 'compatFromFav', 'compatHint',
@@ -201,6 +203,11 @@ const ZW = require('./js/interpret.js');
 global.ZWInterpret = ZW;
 global.window.ZWInterpret = ZW;
 
+// 星 × 宫位 情境库（interpret.js 依赖它给出逐宫解读）
+const ZWSPMod = require('./js/star-palace.js');
+global.ZWStarPalace = ZWSPMod;
+global.window.ZWStarPalace = ZWSPMod;
+
 // --- 载入 app.js ---
 const appSrc = fs.readFileSync(path.join(__dirname, 'js/app.js'), 'utf8');
 try {
@@ -237,6 +244,14 @@ console.log('  优势/课题/建议块数:', blocks, blocks >= 3 ? '✓' : '✗ 
 const focus = (ids.readingFocus.innerHTML.match(/class="focus-item/g) || []).length;
 console.log('  四化要点数:', focus, focus === 4 ? '✓' : '✗ 应为 4');
 console.log('  四化首条:', strip(ids.readingFocus.innerHTML).slice(0, 56));
+
+// 十二宫逐宫解读：这是本命解读信息量的关键，
+// 缺了它，不同命盘只能读出十几种结果
+const pcards = (ids.palaceGrid.innerHTML.match(/class="palace-card"/g) || []).length;
+console.log('  十二宫卡片数:', pcards, pcards === 12 ? '✓' : '✗ 应为 12');
+const plines = (ids.palaceGrid.innerHTML.match(/class="pg-line"/g) || []).length;
+console.log('  逐宫解读条目数:', plines, plines >= 30 ? '✓' : '✗ 应≥30（12宫×3条）');
+console.log('  首张卡片:', strip(ids.palaceGrid.innerHTML).slice(0, 70));
 const guide = (ids.guideList.innerHTML.match(/class="guide-item/g) || []).length;
 console.log('  新手导读步数:', guide, guide === 4 ? '✓' : '✗ 应为 4');
 console.log('  信息条注解:', (ids.infoChips.innerHTML.match(/data-term=/g) || []).length, '处');
